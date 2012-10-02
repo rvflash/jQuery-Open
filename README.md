@@ -20,10 +20,10 @@ Attach events when the element exits of the current view. The DOM element has be
     });
 
 Finally you can overload common behavior of a list by adding classname on each element (self, blank or iframe): 
-    <ol>
-        <li><a href="http://www.twenga.fr">Twenga</a></li>
-        <li><a href="http://www.google.fr" class="blank">Google</a></li>
-    </ol>
+    ...
+        <a href="http://www.twenga.fr">Twenga</a>
+        <a href="http://www.google.fr" class="blank">Google</a>
+    ...
     <script type="text/javascript">
         $("a").open({type: 'iframe'});
     </script>
