@@ -42,7 +42,7 @@
         }
         // Prevent exit ?
         if ($.isFunction(settings.onExit)) {
-            settings.onExit(_self);
+            settings.onExit(elem);
         }
         // Redirect to
         if (OPEN_IN_WINDOW == type) {
