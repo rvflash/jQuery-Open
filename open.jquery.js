@@ -79,6 +79,10 @@
             for (opts in options) {
                 properties.push(opts + ' = "' + options[opts] + '"');
             }
+            var iframes = $('#' + settings.iframe.name + ' iframe');
+            if (settings.iframe.domMaxSize <= iframes.length) {
+                iframes.filter(':first').remove();
+            }
             $('#' + settings.iframe.name).append(
                     '<iframe ' + properties.join(' ') + '></iframe>');
         }
@@ -95,7 +99,11 @@
                 $('#' + settings.iframe.loading.name).hide();
             }
         }
-        $('#' + settings.name).show();
+        if (settings.iframe.displayInline) {
+            $('#' + settings.name).show();
+        } else {
+            $('#' + settings.name).css('display', 'block');
+        }
     };
 
     var popup = function(url, settings) {
@@ -129,7 +137,9 @@
                     name : '_openloader',
                     content : 'Please be patient, loading ...',
                     enable : true
-                }
+                },
+                displayInline : false,
+                domMaxSize: 5
             },
             popup : {
                 scrollbars : 'yes',
