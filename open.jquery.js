@@ -10,15 +10,20 @@
  */
 ;
 (function($) {
-    var OPEN_IN_VIEW = 'self';
-    var OPEN_IN_WINDOW = 'blank';
-    var OPEN_IN_FRAME = 'iframe';
+    var _workspace = {
+        type : {
+            self : 'self',
+            blank : 'blank',
+            iframe : 'iframe'
+        },
+        onview : null
+    };
 
-    var open = function(elem, settings) {
+    var open = function(elem, settings)
+    {
         // Generate unique identifier
         if (null == $(elem).data('_openid')) {
-            $(elem).data('_openid',
-                    '_open' + Math.floor((Math.random() * 1001) + 1));
+            $(elem).data('_openid', '_open' + Math.floor((Math.random() * 1001) + 1));
         }
         settings.name = $(elem).data('_openid');
 
@@ -31,41 +36,40 @@
             return;
         }
         // Type of
-        if ($(elem).hasClass(OPEN_IN_VIEW)) {
-            type = OPEN_IN_VIEW;
-        } else if ($(elem).hasClass(OPEN_IN_WINDOW)) {
-            type = OPEN_IN_WINDOW;
-        } else if ($(elem).hasClass(OPEN_IN_FRAME)) {
-            type = OPEN_IN_FRAME;
+        if ($(elem).hasClass(_workspace.type.self)) {
+            type = _workspace.type.self;
+        } else if ($(elem).hasClass(_workspace.type.blank)) {
+            type = _workspace.type.blank;
+        } else if ($(elem).hasClass(_workspace.type.iframe)) {
+            type = _workspace.type.iframe;
         } else {
             type = settings.type;
         }
-        // Prevent exit ?
-        if ($.isFunction(settings.onExit)) {
-            settings.onExit(elem);
-        }
-        // Redirect to
-        if (OPEN_IN_WINDOW == type) {
-            return popup(url, settings);
-        } else if (OPEN_IN_FRAME == type) {
-            return iframe(url, settings);
-        } else {
-            return window.location.href = url;
+        switch (type) {
+            case _workspace.type.iframe:
+                return _iframe(url, settings);
+            case _workspace.type.blank:
+                return _popup(url, settings);
+            case _workspace.type.self:
+            default:
+                return _redirect(url, settings);
         }
     };
 
-    var iframe = function(url, settings) {
+    var _iframe = function(url, settings)
+    {
+        _workspace.onview = settings.name;
+
         // Build environment
         if (0 == $('#' + settings.iframe.name).length) {
-            $(document.body).append(
-                    '<div id="' + settings.iframe.name + '"></div>');
+            $(document.body).append('<div id="' + settings.iframe.name + '"></div>');
         }
         // Display loading message
         if (settings.iframe.loading.enable) {
             if (0 == $('#' + settings.iframe.loading.name).length) {
                 $(document.body).append(
-                        '<div id="' + settings.iframe.loading.name + '">'
-                                + settings.iframe.loading.content + '</div>');
+                    '<div id="' + settings.iframe.loading.name + '">' + settings.iframe.loading.content + '</div>'
+                );
             } else {
                 $('#' + settings.iframe.loading.name).show();
             }
@@ -83,30 +87,41 @@
             if (settings.iframe.domMaxSize <= iframes.length) {
                 iframes.filter(':first').remove();
             }
-            $('#' + settings.iframe.name).append(
-                    '<iframe ' + properties.join(' ') + '></iframe>');
+            $('#' + settings.iframe.name).append('<iframe ' + properties.join(' ') + '></iframe>');
         }
         $('#' + settings.iframe.name + ' iframe').hide();
 
         // Redirect to
         if (settings.iframe.loading.enable) {
             if (undefined == $('#' + settings.name).attr('src')) {
-                $('#' + settings.name).attr('src', url).load(function() {
-                    $('#' + settings.iframe.loading.name).hide();
-                    $(this).show();
+                return $('#' + settings.name).attr('src', url).load(function() {
+                    _iframeOpened(settings);
                 });
-            } else {
-                $('#' + settings.iframe.loading.name).hide();
             }
+        }
+        return _iframeOpened(settings);
+    };
+    
+    var _iframeOpened = function(settings)
+    {
+        if (_workspace.onview != settings.name) {
+            return;
+        }
+        if (settings.iframe.loading.enable) {
+            $('#' + settings.iframe.loading.name).hide();
         }
         if (settings.iframe.displayInline) {
             $('#' + settings.name).show();
         } else {
             $('#' + settings.name).css('display', 'block');
         }
-    };
+        if ($.isFunction(settings.onExit)) {
+            settings.onExit(settings.name);
+        }
+    }
 
-    var popup = function(url, settings) {
+    var _popup = function(url, settings)
+    {
         var options = settings.popup;
         options.width = (screen.width * 0.80);
         if (options.width < 780) {
@@ -116,17 +131,27 @@
         if (options.height < 420) {
             settings.popup.height = 420;
         }
-
         var header = [];
         for (opts in options) {
             header.push(opts + '=' + options[opts]);
         }
+        if ($.isFunction(settings.onExit)) {
+            settings.onExit(settings.name);
+        }
         return window.open(url, options.name, header.join(','));
     };
+    
+    var _redirect = function(url, settings)
+    {
+        if ($.isFunction(settings.onExit)) {
+            settings.onExit(settings.name);
+        }
+        return window.location.href = url;
+    }
 
     $.fn.open = function(settings) {
         var defaults = {
-            type : OPEN_IN_VIEW, // self or blank or iframe, can be overload by className
+            type : _workspace.type.self, // self or blank or iframe, can be overload by className
             iframe : {
                 name : '_openbrowser',
                 options : {
@@ -139,7 +164,7 @@
                     enable : true
                 },
                 displayInline : false,
-                domMaxSize: 5
+                domMaxSize : 5
             },
             popup : {
                 scrollbars : 'yes',
@@ -159,12 +184,12 @@
         };
         var settings = $.extend({}, defaults, settings);
 
+        if (settings.autoload) {
+            open($(this).filter(':first'), settings);
+        }
         $(this).bind('click', function(e) {
             e.preventDefault();
             open(this, settings);
         });
-        if (settings.autoload) {
-            open($(this).filter(':first'), settings);
-        }
     };
 })(jQuery);
