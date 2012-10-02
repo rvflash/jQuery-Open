@@ -23,9 +23,8 @@ Finally you can overload common behavior of a list by adding classname on each e
     <pre>
         <a href="http://www.twenga.fr">Twenga</a>
         <a href="http://www.google.fr" class="blank">Google</a>
-        <script type="text/javascript">
-            $("a").open({type: 'iframe'});
-        </script>
+        ...
+        $("a").open({type: 'iframe'});
     </pre>
     
 In this sample, Twenga will open in iframe and Google in new window.
