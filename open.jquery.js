@@ -118,8 +118,7 @@
 
     $.fn.open = function(settings) {
         var defaults = {
-            type : OPEN_IN_VIEW, // self or blank or iframe, can be overload
-            // by className
+            type : OPEN_IN_VIEW, // self or blank or iframe, can be overload by className
             iframe : {
                 name : '_openbrowser',
                 options : {
@@ -146,7 +145,7 @@
                 width : 420
             },
             onExit : null,
-            autoload : true
+            autoload : false
         };
         var settings = $.extend({}, defaults, settings);
 
