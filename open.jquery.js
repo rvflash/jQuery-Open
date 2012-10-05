@@ -93,7 +93,7 @@
 
         // Redirect to
         if (settings.iframe.loading.enable) {
-            if (undefined == $('#' + settings.name).attr('src')) {
+            if ('' == $('#' + settings.name).attr('src')) {
                 return $('#' + settings.name).attr('src', url).load(function() {
                     _iframeOpened(settings);
                 });
@@ -155,6 +155,7 @@
             iframe : {
                 name : '_openbrowser',
                 options : {
+                    src : '',
                     scrolling : 'auto',
                     frameborder : 0
                 },
