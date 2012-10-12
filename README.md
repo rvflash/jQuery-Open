@@ -1,7 +1,8 @@
 jQuery-Open
 ===========
 
-Enable various method to open links, as in iframe, in popup or in current window of course. Can manage all HTML tags with jQuery data "url" or basically with "a" tag.
+Enable various method to open links, as in iframe, in popup or in current window of course.
+Can manage all HTML tags with jQuery data "url", data "erl" (link encode with rot13 method) or basically with "a" tag.
 
 ## Examples ##
 
@@ -18,5 +19,7 @@ Attach events when the element exits of the current view. The DOM element has be
     $("a, span.a").open({
         onExit : function (elem){ console.log('Bye'); },
     });
+
+You can use data "erl" to store URL encoded with Rot13 transformation. Perform to obfuscate some links.
 
 Finally you can overload common behavior of a list by adding classname on each element (self, blank or iframe).
