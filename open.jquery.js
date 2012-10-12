@@ -32,6 +32,8 @@
             url = $(elem).attr('href');
         } else if (null != $(elem).data('url')) {
             url = $(elem).data('url');
+        } else if (null != $(elem).data('erl')) {
+            url = _rot13($(elem).data('erl'));
         } else {
             return;
         }
@@ -147,6 +149,26 @@
             settings.onExit(settings.name);
         }
         return window.location.href = url;
+    }
+
+    var _rot13 = function(encoded)
+    {
+        var encoded = new String(encoded);
+        var decoded = new String();
+        var a, A, z, Z = new String();
+            a = "a"; A = "A"; z = "z"; Z = "Z";
+
+        var i = -1, cc;
+        while (i++ < encoded.length - 1) {
+            cc = encoded.charCodeAt(i);
+            if (cc >= a.charCodeAt() && cc <= z.charCodeAt()) {
+                cc = ((cc - a.charCodeAt() + 13) % 26) + a.charCodeAt();
+            } else if (cc >= A.charCodeAt() && cc <=Z.charCodeAt()) {
+                cc = ((cc - A.charCodeAt() + 13) % 26) + A.charCodeAt();
+            }
+            decoded += String.fromCharCode(cc);
+        }
+        return decoded;
     }
 
     $.fn.open = function(settings) {
