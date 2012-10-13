@@ -153,7 +153,8 @@
             return null;
         }
         if ($(elem).hasClass(_workspace.addUniqueIdentifierClass)) {
-            url += (-1 != url.indexOf('?') ? '&' : '?') + '_i=' + settings.name;
+            url += (-1 != url.indexOf('?') ? '&' : '?') + '_i='
+                    + new Date().getTime();
         }
         return url;
     };
