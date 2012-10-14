@@ -23,8 +23,7 @@
     var open = function(elem, settings) {
         // Generate unique identifier
         if (null == $(elem).data('_openid')) {
-            $(elem).data('_openid',
-                    '_open' + Math.floor((Math.random() * 1001) + 1));
+            $(elem).data('_openid', '_open' + Math.floor((Math.random() * 1001) + 1));
         }
         settings.name = $(elem).data('_openid');
 
@@ -56,15 +55,12 @@
 
         // Build environment
         if (0 == $('#' + settings.iframe.name).length) {
-            $(document.body).append(
-                    '<div id="' + settings.iframe.name + '"></div>');
+            $(document.body).append('<div id="' + settings.iframe.name + '"></div>');
         }
         // Display loading message
         if (settings.iframe.loading.enable) {
             if (0 == $('#' + settings.iframe.loading.name).length) {
-                $(document.body).append(
-                        '<div id="' + settings.iframe.loading.name + '">'
-                                + settings.iframe.loading.content + '</div>');
+                $(document.body).append('<div id="' + settings.iframe.loading.name + '">' + settings.iframe.loading.content + '</div>');
             } else {
                 $('#' + settings.iframe.loading.name).show();
             }
@@ -82,8 +78,7 @@
             if (settings.iframe.domMaxSize <= iframes.length) {
                 iframes.filter(':first').remove();
             }
-            $('#' + settings.iframe.name).append(
-                    '<iframe ' + properties.join(' ') + '></iframe>');
+            $('#' + settings.iframe.name).append('<iframe ' + properties.join(' ') + '></iframe>');
         }
         $('#' + settings.iframe.name + ' iframe').hide();
 
@@ -153,8 +148,7 @@
             return null;
         }
         if ($(elem).hasClass(_workspace.addUniqueIdentifierClass)) {
-            url += (-1 != url.indexOf('?') ? '&' : '?') + '_i='
-                    + new Date().getTime();
+            url += (-1 != url.indexOf('?') ? '&' : '?') + '_i=' + new Date().getTime();
         }
         return url;
     };
