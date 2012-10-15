@@ -16,27 +16,17 @@
             blank : 'blank',
             iframe : 'iframe'
         },
-        onview : null
+        onview : null,
+        addUniqueIdentifierClass : 'unique'
     };
 
-    var open = function(elem, settings)
-    {
+    var open = function(elem, settings) {
         // Generate unique identifier
         if (null == $(elem).data('_openid')) {
             $(elem).data('_openid', '_open' + Math.floor((Math.random() * 1001) + 1));
         }
         settings.name = $(elem).data('_openid');
 
-        // Url to redirect
-        if (undefined != $(elem).attr('href')) {
-            url = $(elem).attr('href');
-        } else if (null != $(elem).data('url')) {
-            url = $(elem).data('url');
-        } else if (null != $(elem).data('erl')) {
-            url = _rot13($(elem).data('erl'));
-        } else {
-            return;
-        }
         // Type of
         if ($(elem).hasClass(_workspace.type.self)) {
             type = _workspace.type.self;
@@ -47,7 +37,8 @@
         } else {
             type = settings.type;
         }
-        switch (type) {
+        if (null != (url = _url(elem, settings))) {
+            switch (type) {
             case _workspace.type.iframe:
                 return _iframe(url, settings);
             case _workspace.type.blank:
@@ -55,11 +46,11 @@
             case _workspace.type.self:
             default:
                 return _redirect(url, settings);
+            }
         }
     };
 
-    var _iframe = function(url, settings)
-    {
+    var _iframe = function(url, settings) {
         _workspace.onview = settings.name;
 
         // Build environment
@@ -69,9 +60,7 @@
         // Display loading message
         if (settings.iframe.loading.enable) {
             if (0 == $('#' + settings.iframe.loading.name).length) {
-                $(document.body).append(
-                    '<div id="' + settings.iframe.loading.name + '">' + settings.iframe.loading.content + '</div>'
-                );
+                $(document.body).append('<div id="' + settings.iframe.loading.name + '">' + settings.iframe.loading.content + '</div>');
             } else {
                 $('#' + settings.iframe.loading.name).show();
             }
@@ -103,9 +92,8 @@
         }
         return _iframeOpened(settings);
     };
-    
-    var _iframeOpened = function(settings)
-    {
+
+    var _iframeOpened = function(settings) {
         if (_workspace.onview != settings.name) {
             return;
         }
@@ -120,10 +108,9 @@
         if ($.isFunction(settings.onExit)) {
             settings.onExit(settings.name);
         }
-    }
+    };
 
-    var _popup = function(url, settings)
-    {
+    var _popup = function(url, settings) {
         var options = settings.popup;
         options.width = (screen.width * 0.80);
         if (options.width < 780) {
@@ -142,38 +129,55 @@
         }
         return window.open(url, options.name, header.join(','));
     };
-    
-    var _redirect = function(url, settings)
-    {
+
+    var _redirect = function(url, settings) {
         if ($.isFunction(settings.onExit)) {
             settings.onExit(settings.name);
         }
         return window.location.href = url;
-    }
+    };
 
-    var _rot13 = function(encoded)
-    {
-        var encoded = new String(encoded);
+    var _url = function(elem, settings) {
+        if (undefined != $(elem).attr('href')) {
+            url = $(elem).attr('href');
+        } else if (null != $(elem).data('url')) {
+            url = $(elem).data('url');
+        } else if (null != $(elem).data('erl')) {
+            url = _rot13($(elem).data('erl'));
+        } else {
+            return null;
+        }
+        if ($(elem).hasClass(_workspace.addUniqueIdentifierClass)) {
+            url += (-1 != url.indexOf('?') ? '&' : '?') + '_i=' + new Date().getTime();
+        }
+        return url;
+    };
+
+    var _rot13 = function(encoded) {
         var decoded = new String();
         var a, A, z, Z = new String();
-            a = "a"; A = "A"; z = "z"; Z = "Z";
+        a = "a";
+        A = "A";
+        z = "z";
+        Z = "Z";
 
         var i = -1, cc;
         while (i++ < encoded.length - 1) {
             cc = encoded.charCodeAt(i);
             if (cc >= a.charCodeAt() && cc <= z.charCodeAt()) {
                 cc = ((cc - a.charCodeAt() + 13) % 26) + a.charCodeAt();
-            } else if (cc >= A.charCodeAt() && cc <=Z.charCodeAt()) {
+            } else if (cc >= A.charCodeAt() && cc <= Z.charCodeAt()) {
                 cc = ((cc - A.charCodeAt() + 13) % 26) + A.charCodeAt();
             }
             decoded += String.fromCharCode(cc);
         }
         return decoded;
-    }
+    };
 
     $.fn.open = function(settings) {
         var defaults = {
-            type : _workspace.type.self, // self or blank or iframe, can be overload by className
+            type : _workspace.type.self, // self or blank or iframe, can be
+            // overload by className
             iframe : {
                 name : '_openbrowser',
                 options : {
