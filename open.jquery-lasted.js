@@ -23,7 +23,6 @@
 
     var open = function(elem, settings)
     {
-        // Generate unique identifier
         if (null == $(elem).data('_openid')) {
             $(elem).data('_openid', '_open' + Math.floor((Math.random() * 1001) + 1));
         }
@@ -78,7 +77,9 @@
                 _loadedView(settings.name, settings.ajax, settings.onExit);
             }).error(function()
             {
-                _occuredError(settings.ajax);
+            	if (settings.ajax.error.enable) {
+                    $('#' + settings.ajax.error.name).show().delay(1000).hide();
+                }
             });
         }
         return _loadedView(settings.name, settings.ajax, settings.onExit);
@@ -117,7 +118,8 @@
         return _loadedView(settings.name, settings.iframe, settings.onExit);
     };
 
-    var popup = function(url, settings) {
+    var popup = function(url, settings)
+    {
         var options = settings.popup;
         options.width = (screen.width * 0.80);
         if (options.width < 780) {
@@ -137,7 +139,8 @@
         return window.open(url, options.name, header.join(','));
     };
 
-    var redirect = function(url, settings) {
+    var redirect = function(url, settings)
+    {
         if ($.isFunction(settings.onExit)) {
             settings.onExit(settings.name);
         }
@@ -169,7 +172,8 @@
         }
     };
 
-    var _loadedView = function(name, options, callback) {
+    var _loadedView = function(name, options, callback)
+    {
         if (_workspace.onview != name) {
             return;
         }
@@ -191,14 +195,9 @@
         }
     };
 
-    var _occuredError = function(options)
+    var _url = function(elem, settings)
     {
-        if (options.error.enable) {
-            $('#' + options.error.name).show().delay(1000).hide();
-        }
-    };
-
-    var _url = function(elem, settings) {
+    	// Extract url
         if (undefined != $(elem).attr('href')) {
             url = $(elem).attr('href');
         } else if (null != $(elem).data('url')) {
@@ -208,13 +207,19 @@
         } else {
             return null;
         }
+        // Add optional parameters
+        if (null != $(elem).data('arg')) {
+            url += (-1 != url.indexOf('?') ? '&' : '?') + $(elem).data('arg');
+        }
+        // Extend with an unique identifier
         if ($(elem).hasClass(_workspace.uniqueIdentifier)) {
             url += (-1 != url.indexOf('?') ? '&' : '?') + '_i=' + new Date().getTime();
         }
         return url;
     };
 
-    var _rot13 = function(encoded) {
+    var _rot13 = function(encoded)
+    {
         var decoded = new String();
         var a, A, z, Z = new String();
         a = "a"; A = "A"; z = "z"; Z = "Z";
@@ -232,7 +237,8 @@
         return decoded;
     };
 
-    $.fn.open = function(settings) {
+    $.fn.open = function(settings)
+    {
         var defaults = {
             type : _workspace.type.self,
             ajax : {
