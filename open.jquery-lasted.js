@@ -191,7 +191,7 @@
         }
         // Apply callback function 
         if ($.isFunction(callback)) {
-            callback(settings.name);
+            callback(name);
         }
     };
 
