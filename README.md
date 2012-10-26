@@ -31,6 +31,14 @@ Attach events when the element exits of the current view. The DOM element has be
         onExit : function (elem){ console.log('Bye'); },
     });
 
+If you want to use event delegation, please use this syntax :
+
+    $.open('.a, span.a');
+
+And if you want to change the container of the delegation, this one :
+
+    $.open('.a, span.a', {container: '.myContainer'});
+
 You can use data "erl" to store URL encoded with Rot13 transformation. Perform to obfuscate some links.
 
 Finally you can overload common behavior of a list by adding classname on each element (self, blank or iframe).
