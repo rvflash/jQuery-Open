@@ -1,6 +1,6 @@
 /**
  * jQuery Open plugin
- *
+ * 
  * @desc Enable to open links in iframe with loading message, in current view or
  *       in a new window
  * @author Hervé GOUCHET
@@ -76,13 +76,13 @@
         }
         if (null != (url = _url(elem, settings))) {
             switch (type) {
-                case _workspace.type.iframe:
-                    return _iframe(url, settings);
-                case _workspace.type.blank:
-                    return _popup(url, settings);
-                case _workspace.type.self:
-                default:
-                    return _redirect(url, settings);
+            case _workspace.type.iframe:
+                return _iframe(url, settings);
+            case _workspace.type.blank:
+                return _popup(url, settings);
+            case _workspace.type.self:
+            default:
+                return _redirect(url, settings);
             }
         }
     };
