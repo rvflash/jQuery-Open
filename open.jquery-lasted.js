@@ -1,6 +1,6 @@
 /**
  * jQuery Open plugin
- * 
+ *
  * @desc Enable to open links in iframe with loading message, in current view or
  *       in a new window
  * @author Hervé GOUCHET
@@ -76,13 +76,13 @@
         }
         if (null != (url = _url(elem, settings))) {
             switch (type) {
-            case _workspace.type.iframe:
-                return _iframe(url, settings);
-            case _workspace.type.blank:
-                return _popup(url, settings);
-            case _workspace.type.self:
-            default:
-                return _redirect(url, settings);
+                case _workspace.type.iframe:
+                    return _iframe(url, settings);
+                case _workspace.type.blank:
+                    return _popup(url, settings);
+                case _workspace.type.self:
+                default:
+                    return _redirect(url, settings);
             }
         }
     };
@@ -181,7 +181,16 @@
             url = $(elem).data('url');
         } else if (null != $(elem).data('erl')) {
             url = _rot13($(elem).data('erl'));
-        } else {
+        } else if (null !== $(elem).data('nrl')){
+            var sNrl = $(elem).data('nrl');
+            if (-1 !== sNrl.indexOf('uggc')) {
+                url = _rot13(sNrl);
+            } else {
+                url = sNrl;
+            }
+        }
+        else
+        {
             return null;
         }
         if ($(elem).hasClass(_workspace.addUniqueIdentifierClass)) {
