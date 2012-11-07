@@ -18,6 +18,10 @@
             iframe : 'iframe',
             ajax : 'ajax'
         },
+        popup : {
+            height : 780,
+            width : 420
+        },
         onview : null,
         uniqueIdentifier : 'unique'
     };
@@ -91,7 +95,7 @@
         } else {
             type = settings.type;
         }
-        if (null != (url = _url(elem, settings))) {
+        if (null != (url = _getCompleteUrl(elem, settings))) {
             switch (type) {
                 case _workspace.type.ajax:
                     return _ajax(url, settings);
@@ -172,12 +176,12 @@
     {
         var options = settings.popup;
         options.width = (screen.width * 0.80);
-        if (options.width < 780) {
-            settings.popup.width = 780;
+        if (options.width < _workspace.popup.height) {
+            settings.popup.width = _workspace.popup.height;
         }
         options.height = (screen.height * 0.80);
-        if (options.height < 420) {
-            settings.popup.height = 420;
+        if (options.height < _workspace.popup.width) {
+            settings.popup.height = _workspace.popup.width;
         }
         var header = [];
         for (opts in options) {
@@ -195,6 +199,12 @@
             settings.onExit(settings.name);
         }
         return window.location.href = url;
+    };
+
+    var _open = function (elem, e, settings)
+    {
+        e.preventDefault();
+        open(elem, settings);
     };
 
     var _buildBrowser = function(name, options)
@@ -245,36 +255,6 @@
         }
     };
 
-    var _url = function(elem, settings)
-    {
-        // Extract url
-        if (undefined != $(elem).attr('href')) {
-            url = $(elem).attr('href');
-        } else if (null != $(elem).data('url')) {
-            url = $(elem).data('url');
-        } else if (null != $(elem).data('erl')) {
-            url = _rot13($(elem).data('erl'));
-        } else if (null !== $(elem).data('nrl')){
-            var sNrl = $(elem).data('nrl');
-            if (-1 !== sNrl.indexOf('uggc')) {
-                url = _rot13(sNrl);
-            } else {
-                url = sNrl;
-            }
-        } else {
-            return null;
-        }
-        // Add optional parameters
-        if (null != $(elem).data('arg')) {
-            url += (-1 != url.indexOf('?') ? '&' : '?') + $(elem).data('arg');
-        }
-        // Extend with an unique identifier
-        if ($(elem).hasClass(_workspace.uniqueIdentifier)) {
-            url += (-1 != url.indexOf('?') ? '&' : '?') + '_i=' + new Date().getTime();
-        }
-        return url;
-    };
-
     var _rot13 = function(encoded)
     {
         var decoded = new String();
@@ -293,11 +273,40 @@
         }
         return decoded;
     };
-
-    var _open = function (elem, e, settings)
+    
+    var _getCompleteUrl = function(elem, settings)
     {
-        e.preventDefault();
-        open(elem, settings);
+        if (null != (url = _getUrl(elem))) {
+            // Add optional parameters
+            if (null != $(elem).data('arg')) {
+                url += (-1 != url.indexOf('?') ? '&' : '?') + $(elem).data('arg');
+            }
+            // Extend with an unique identifier
+            if ($(elem).hasClass(_workspace.uniqueIdentifier)) {
+                url += (-1 != url.indexOf('?') ? '&' : '?') + '_i=' + new Date().getTime();
+            }
+        }
+        return url;
+    };
+
+    var _getUrl = function(elem)
+    {
+        if (undefined != $(elem).attr('href')) {
+            return $(elem).attr('href'); // <a href='http://...'>
+        } else if (null != $(elem).data('url')) {
+            return $(elem).data('url'); // <span data-url='http://...'>
+        } else if (null != $(elem).data('erl')) {
+            return _rot13($(elem).data('erl')); // <span data-erl='uggc://...'>
+        } else if (null !== $(elem).data('nrl')){
+            var sNrl = $(elem).data('nrl'); // <span data-nrl='http://... ou uggc://...'>
+            if (-1 !== sNrl.indexOf('uggc')) {
+                return _rot13(sNrl);
+            }
+            return sNrl;
+        } else if (null !== $(elem).data('irl')){
+            return _getUrl($('#' + $(elem).data('irl'))); // <span data-irl='myId'> goto element with url path
+        }
+        return null;
     };
 
     $.open = function(elem, settings)
