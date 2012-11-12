@@ -291,19 +291,19 @@
 
     var _getUrl = function(elem)
     {
-        if (undefined != $(elem).attr('href')) {
+        if ('undefined' !== typeof $(elem).attr('href')) {
             return $(elem).attr('href'); // <a href='http://...'>
-        } else if (null != $(elem).data('url')) {
+        } else if ('undefined' !== typeof $(elem).data('url')) {
             return $(elem).data('url'); // <span data-url='http://...'>
-        } else if (null != $(elem).data('erl')) {
+        } else if ('undefined' !== typeof $(elem).data('erl')) {
             return _rot13($(elem).data('erl')); // <span data-erl='uggc://...'>
-        } else if (null !== $(elem).data('nrl')){
+        } else if ('undefined' !== typeof $(elem).data('nrl')){
             var sNrl = $(elem).data('nrl'); // <span data-nrl='http://... ou uggc://...'>
             if (-1 !== sNrl.indexOf('uggc:')) {
                 return _rot13(sNrl);
             }
             return sNrl;
-        } else if (null !== $(elem).data('irl')){
+        } else if ('undefined' !== typeof $(elem).data('irl')){
             return _getUrl($('#' + $(elem).data('irl'))); // <span data-irl='myId'> goto element with url path
         }
         return null;
