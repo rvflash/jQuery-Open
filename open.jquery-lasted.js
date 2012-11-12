@@ -25,7 +25,7 @@
         onview : null,
         uniqueIdentifier : 'unique'
     };
-     
+
     var _defaults = {
         type : _workspace.type.self,
         container : 'body',
@@ -299,7 +299,7 @@
             return _rot13($(elem).data('erl')); // <span data-erl='uggc://...'>
         } else if (null !== $(elem).data('nrl')){
             var sNrl = $(elem).data('nrl'); // <span data-nrl='http://... ou uggc://...'>
-            if (-1 !== sNrl.indexOf('uggc')) {
+            if (-1 !== sNrl.indexOf('uggc:')) {
                 return _rot13(sNrl);
             }
             return sNrl;
@@ -320,7 +320,7 @@
 
     $.fn.open = function(settings)
     {
-        var settings = $.extend({}, defaults, settings);
+        var settings = $.extend({}, _defaults, settings);
         $(this).bind('click', function(e)
         {
             _open(this, e, settings);
