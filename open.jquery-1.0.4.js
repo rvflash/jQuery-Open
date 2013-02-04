@@ -177,20 +177,20 @@
         var options = settings.popup;
         options.width = (screen.width * 0.80);
         if (options.width < _workspace.popup.height) {
-            options.height = _workspace.popup.height;
+            settings.popup.width = _workspace.popup.height;
         }
         options.height = (screen.height * 0.80);
         if (options.height < _workspace.popup.width) {
-            options.width = _workspace.popup.width;
+            settings.popup.height = _workspace.popup.width;
         }
         var header = [];
-        for (var opts in options) {
+        for (opts in options) {
             header.push(opts + '=' + options[opts]);
         }
         if ($.isFunction(settings.onExit)) {
             settings.onExit(settings.name);
         }
-        return window.open(url, settings.name, header.join(','));
+        return window.open(url, options.name, header.join(','));
     };
 
     var _redirect = function(url, settings)
