@@ -4,7 +4,7 @@
  * @desc Enable to open links in iframe with loading message, in ajax, in current view or in a new window
  * @author Hervé GOUCHET
  * @author Julien LEFEVRE
- * @requires jQuery 1.4.3+
+ * @use jQuery 1.4.3+
  * @licenses Creative Commons BY-SA 2.0
  * @see https://github.com/rvflash/jQuery-Open
  */
@@ -22,7 +22,7 @@
             height : 780,
             width : 420
         },
-        onview : null,
+        onView : null,
         uniqueIdentifier : 'unique'
     };
 
@@ -76,7 +76,7 @@
         autoload : false
     };
     
-    var open = function(elem, settings)
+    var open = function (elem, settings)
     {
         if (null == $(elem).data('_openid')) {
             $(elem).data('_openid', '_open' + Math.floor((Math.random() * 1001) + 1));
@@ -108,6 +108,7 @@
                     return _redirect(url, settings);
             }
         }
+        return false;
     };
 
     var _ajax = function (url, settings)
@@ -209,7 +210,7 @@
 
     var _buildBrowser = function(name, options)
     {
-        _workspace.onview = name;
+        _workspace.onView = name;
 
         // Build environment
         if (0 == $('#' + options.name).length) {
@@ -234,7 +235,7 @@
 
     var _loadedView = function(name, options, callback)
     {
-        if (_workspace.onview != name) {
+        if (_workspace.onView != name) {
             return;
         }
         // Hide loading message
@@ -311,22 +312,22 @@
 
     $.open = function(elem, settings)
     {
-        var settings = $.extend(_defaults, settings);
-        $(settings.container).delegate(elem, 'click', function(e)
+        var options = $.extend(true, {}, defaults, settings);
+        $(options.container).delegate(elem, 'click', function(e)
         {
-            _open(this, e, settings);
+            _open(this, e, options);
         });
     };
 
     $.fn.open = function(settings)
     {
-        var settings = $.extend({}, _defaults, settings);
+        var options = $.extend(true, {}, _defaults, settings);
         $(this).bind('click', function(e)
         {
-            _open(this, e, settings);
+            _open(this, e, options);
         });
-        if (settings.autoload) {
-            open($(this).filter(':first'), settings);
+        if (options.autoload) {
+            open($(this).filter(':first'), options);
         }
     };
 })(jQuery);
