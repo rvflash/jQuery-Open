@@ -1,16 +1,6 @@
 jQuery-Open
 ===========
 
-## New in 1.1 ##
-    - Now only works by event delegation.
-    - Add event on load, on view for ajax and iframe mode.
-    - Enable to close iframe or ajax box by clicking outside it.
-    - Add closure tag on top of iframe or ajax box.
-    - Manage maximum number of tab also from ajax box.
-    - Convert # as ? in url for ajax mode
-
-=======
-
 Enable various methods to open links:
     - In iframe
     - In popup
@@ -29,17 +19,21 @@ See settings for more informations.
 
 You can also specify 3 type of opening. By default "self", open it in current view, "popup" in new window and "iframe" enable to show url in iframe with loading message:
 
-    $.open("span.a");
+    $("span.a").open({type: 'blank'});
 
 And, you can specify various properties to extend common behaviors, here for example we open the first element on load: 
 
-    $.open("span.a", {type: 'iframe', autoload: true});
+    $("span.a").open({type: 'iframe', autoload: true});
 
 Attach events when the element exits of the current view. The DOM element has been passed as first parameter:
 
-    $.open("a, span.a", {
+    $("a, span.a").open({
         onExit : function (elem){ console.log('Bye'); },
     });
+
+If you want to use event delegation, please use this syntax :
+
+    $.open('.a, span.a');
 
 And if you want to change the container of the delegation, this one :
 
