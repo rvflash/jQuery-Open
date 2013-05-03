@@ -1,6 +1,9 @@
 jQuery-Open
 ===========
 
+## New in 1.2 ##
+    - Now receive as first parameters on callback the event, with dedicated parameter named "currentHref" with URL decoded called.
+
 ## New in 1.1 ##
     - Now only works by event delegation.
     - Add event on load, on view for ajax and iframe mode.
