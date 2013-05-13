@@ -1,6 +1,9 @@
 jQuery-Open
 ===========
 
+## New in 1.2 ##
+    - Now receive as first parameters on callback the event, with dedicated parameter named "currentHref" with URL decoded called.
+
 ## New in 1.1 ##
     - Now only works by event delegation.
     - Add event on load, on view for ajax and iframe mode.
@@ -38,7 +41,7 @@ And, you can specify various properties to extend common behaviors, here for exa
 Attach events when the element exits of the current view. The DOM element has been passed as first parameter:
 
     $.open("a, span.a", {
-        onExit : function (elem){ console.log('Bye'); },
+        onExit : function (e){ console.log('Bye' + e.currentHref); },
     });
 
 And if you want to change the container of the delegation, this one :
