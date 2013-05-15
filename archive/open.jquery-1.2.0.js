@@ -2,7 +2,7 @@
  * jQuery Open plugin
  *
  * @desc Enable to open links in iframe with loading message, in ajax, in current view or in a new window
- * @version 1.2.1
+ * @version 1.2.0
  * @author Hervé GOUCHET
  * @use jQuery 1.7+
  * @licenses Creative Commons BY-SA 2.0
@@ -28,8 +28,7 @@
             height : 780,
             width : 420
         },
-        uniqueIdentifier : 'unique',
-        visibleIdentifier : 'visible'
+        uniqueIdentifier : 'unique'
     };
 
     var _defaults = {
@@ -98,7 +97,7 @@
     {
         e.preventDefault();
 
-        var elem = $(e.currentTarget);
+        var elem = $(e.currentTarget)
         if (null == elem.data(_workspace.data.id)) {
             elem.data(_workspace.data.id, '_open' + Math.floor((Math.random() * 1001) + 1));
         }
@@ -137,22 +136,23 @@
         if ($.isFunction(settings[settings.type].onExit)) {
             settings[settings.type].onExit(e);
         }
-        $(e.currentTarget).hide().removeClass(_workspace.visibleIdentifier);
+        $(e.currentTarget).hide();
 
         // Has active browser ?
         var browser = $('#' + settings.browser.name);
-        if (0 == browser.children('.' + _workspace.visibleIdentifier).length) {
+        if (0 == browser.children('div:visible').length) {
             browser.removeClass(_workspace.data.loaded);
         }
     };
 
     var outerClosure = function (e, opener, settings)
     {
-        var clicked = $(e.target);
-        var elem = $('#' + settings.browser.name + ' div.' + _workspace.visibleIdentifier);
+        var clicked = $(e.currentTarget);
+        var browser = $('#' + settings.browser.name);
+        var elem = browser.children('div:visible');
 
         if (0 < elem.length) {
-            opener = clicked.parents(opener).first();
+            opener = clicked.parents(opener).first(); // existe ??
             if (0 < opener.length) {
                 clicked = opener;
             }
@@ -296,8 +296,7 @@
         }
         // Open viewer
         var elem = $('#' + settings.name);
-        if (_workspace.type.ajax == settings.type && settings.ajax.toggle && elem.hasClass(_workspace.visibleIdentifier)) {
-            e.currentTarget = elem;
+        if (_workspace.type.ajax == settings.type && settings.toggle && elem.is(':visible')) {
             close(e, settings);
         } else {
             // Tag browser as enabled
@@ -309,7 +308,6 @@
             } else {
                 elem.css('display', 'block');
             }
-            elem.addClass(_workspace.visibleIdentifier);
 
             // Apply callback function on first loading
             if (null == elem.data(_workspace.data.loaded)) {
