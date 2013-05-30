@@ -11,6 +11,7 @@
     <ol>
         <li><span class="a" data-url="http://wikipedia.fr">http://wikipedia.fr</span></li>
         <li><a href="http://bing.fr">http://bing.fr</a></li>
+        <li><a href="http://www.rvdevsign.net">http://www.rvdevsign.net</a></li>
         <li><span class="a" data-erl="uggc://ovwbhk.dn.gjratn.se/thrff-ho306501.ugzy">http://www.twenga.fr</a></li>
         <li><a href="http://showcase.it">http://showcase.it</a></li>
         <li><span class="a" data-url="http://apple.fr">http://apple.fr</span></li>
@@ -19,7 +20,20 @@
     <script src="http://code.jquery.com/jquery-1.8.2.min.js" type="text/javascript"></script>
     <script src="../open.jquery-lasted.js" type="text/javascript"></script>
     <script type="text/javascript">
-        $.open('a, span.a', {type: 'iframe', autoload: true, browser: {outerClosure : true}});
-    </script> 
+        function callBack(e)
+        {
+            console.log(e.currentHref);
+        };
+        $.open('a, span.a', {
+            type: 'iframe',
+            autoload: true,
+            browser: {
+                outerClosure : true
+            },
+            iframe : {
+                onView: function(e) { callBack(e); }
+            }
+        });
+    </script>
 </body>
 </html>
