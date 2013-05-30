@@ -2,7 +2,7 @@
  * jQuery Open plugin
  *
  * @desc Enable to open links in iframe with loading message, in ajax, in current view or in a new window
- * @version 1.2.1
+ * @version 1.3.0
  * @author Hervé GOUCHET
  * @use jQuery 1.7+
  * @licenses Creative Commons BY-SA 2.0
@@ -137,7 +137,7 @@
         if ($.isFunction(settings[settings.type].onExit)) {
             settings[settings.type].onExit(e);
         }
-        $(e.currentTarget).hide().removeClass(_workspace.visibleIdentifier);
+        $(e.currentTab).hide().removeClass(_workspace.visibleIdentifier);
 
         // Has active browser ?
         var browser = $('#' + settings.browser.name);
@@ -165,7 +165,7 @@
                 } else {
                     settings.type = _workspace.type.ajax;
                 }
-                e.currentTarget = elem;
+                e.currentTab = elem;
                 close(e, settings);
             }
         }
@@ -294,10 +294,12 @@
         if (settings.browser.loading.enable) {
             $('#' + settings.browser.loading.name).hide();
         }
-        // Open viewer
-        var elem = $('#' + settings.name);
-        if (_workspace.type.ajax == settings.type && settings.ajax.toggle && elem.hasClass(_workspace.visibleIdentifier)) {
-            e.currentTarget = elem;
+        e.currentTab =  $('#' + settings.name);
+
+        if (
+            _workspace.type.ajax == settings.type && settings.ajax.toggle &&
+            e.currentTab.hasClass(_workspace.visibleIdentifier)
+        ) {
             close(e, settings);
         } else {
             // Tag browser as enabled
@@ -305,18 +307,18 @@
 
             // Show dedicated tabs
             if (settings.browser.displayInline) {
-                elem.show();
+                e.currentTab.show();
             } else {
-                elem.css('display', 'block');
+                e.currentTab.css('display', 'block');
             }
-            elem.addClass(_workspace.visibleIdentifier);
+            e.currentTab.addClass(_workspace.visibleIdentifier);
 
             // Apply callback function on first loading
-            if (null == elem.data(_workspace.data.loaded)) {
+            if (null == e.currentTab.data(_workspace.data.loaded)) {
                 if ($.isFunction(settings[settings.type].onLoaded)) {
                     settings[settings.type].onLoaded(e);
                 }
-                elem.data(_workspace.data.loaded, true);
+                e.currentTab.data(_workspace.data.loaded, true);
             }
             // Apply callback function on each view
             if ($.isFunction(settings[settings.type].onView)) {
@@ -398,8 +400,8 @@
         }).on('click', '#' + options.browser.name + ' .' + options.browser.closure.name, function(e)
         {
             if (options.browser.closure.enable) {
-                e.currentTarget = $(this).parent();
-                if ($(e.currentTarget).children('iframe').length) {
+                e.currentTab = $(this).parent();
+                if ($(e.currentTab).children('iframe').length) {
                     options.type = _workspace.type.iframe;
                 } else {
                     options.type = _workspace.type.ajax;
