@@ -1,6 +1,9 @@
 jQuery-Open
 ===========
 
+## New in 1.3 ##
+    - Extend event object with "currentTab" with DOM element of the current opened tab in "browser".
+
 ## New in 1.2 ##
     - Now receive as first parameters on callback the event, with dedicated parameter named "currentHref" with URL decoded called.
 

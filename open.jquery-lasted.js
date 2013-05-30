@@ -165,7 +165,7 @@
                 } else {
                     settings.type = _workspace.type.ajax;
                 }
-                e.currentTab = elem;
+                e.currentTab = elem[0];
                 close(e, settings);
             }
         }
@@ -294,11 +294,12 @@
         if (settings.browser.loading.enable) {
             $('#' + settings.browser.loading.name).hide();
         }
-        e.currentTab =  $('#' + settings.name);
+        var elem = $('#' + settings.name);
+        e.currentTab = elem[0];
 
         if (
             _workspace.type.ajax == settings.type && settings.ajax.toggle &&
-            e.currentTab.hasClass(_workspace.visibleIdentifier)
+            elem.hasClass(_workspace.visibleIdentifier)
         ) {
             close(e, settings);
         } else {
@@ -307,18 +308,18 @@
 
             // Show dedicated tabs
             if (settings.browser.displayInline) {
-                e.currentTab.show();
+                elem.show();
             } else {
-                e.currentTab.css('display', 'block');
+                elem.css('display', 'block');
             }
-            e.currentTab.addClass(_workspace.visibleIdentifier);
+            elem.addClass(_workspace.visibleIdentifier);
 
             // Apply callback function on first loading
-            if (null == e.currentTab.data(_workspace.data.loaded)) {
+            if (null == elem.data(_workspace.data.loaded)) {
                 if ($.isFunction(settings[settings.type].onLoaded)) {
                     settings[settings.type].onLoaded(e);
                 }
-                e.currentTab.data(_workspace.data.loaded, true);
+                elem.data(_workspace.data.loaded, true);
             }
             // Apply callback function on each view
             if ($.isFunction(settings[settings.type].onView)) {
