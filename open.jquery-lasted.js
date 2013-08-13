@@ -2,7 +2,7 @@
  * jQuery Open plugin
  *
  * @desc Enable to open links in iframe with loading message, in ajax, in current view or in a new window
- * @version 1.3.2
+ * @version 1.3.3
  * @author Hervé GOUCHET
  * @use jQuery 1.7+
  * @licenses Creative Commons BY-SA 2.0
@@ -17,7 +17,8 @@
         data : {
             base: null,
             id : '_openid',
-            loaded : '_openloaded'
+            loaded : '_openloaded',
+            loading : '_openloading'
         },
         type : {
             base : null,
@@ -31,7 +32,8 @@
             width : 420
         },
         uniqueIdentifier : 'unique',
-        visibleIdentifier : 'visible'
+        visibleIdentifier : 'visible',
+        notOutIdentifier : 'notouter'
     };
 
     var _defaults = {
@@ -180,23 +182,28 @@
 
     var _ajax = function (e, settings)
     {
-        _buildBrowser(settings);
+        if (null == $('#' + settings.name).data(_workspace.data.loading)) {
+            _buildBrowser(settings);
 
-        if (null == $('#' + _workspace.data.base).data(_workspace.data.loaded)) {
-            return $.get(e.currentHref, function(data)
-            {
-                $('#' + _workspace.data.base).append(data);
-            }).success(function()
+            if (null == $('#' + _workspace.data.base).data(_workspace.data.loaded)) {
+                $('#' + settings.name).data(_workspace.data.loading, true);
+
+                return $.get(e.currentHref, function(data)
                 {
-                    _loadedView(e, settings);
-                }).error(function()
-                {
-                    if (settings.browser.error.enable) {
-                        $('#' + settings.browser.error.name).show().delay(1000).hide();
-                    }
-                });
+                    $('#' + settings.name).data(_workspace.data.loading, false);
+                    $('#' + _workspace.data.base).append(data);
+                }).success(function()
+                    {
+                        _loadedView(e, settings);
+                    }).error(function()
+                    {
+                        if (settings.browser.error.enable) {
+                            $('#' + settings.browser.error.name).show().delay(1000).hide();
+                        }
+                    });
+            }
+            return _loadedView(e, settings);
         }
-        return _loadedView(e, settings);
     };
 
     var _iframe = function(e, settings)
@@ -383,8 +390,8 @@
         } else if ('undefined' !== typeof elem.data('erl')) {
             return _rot13(elem.data('erl')); // <span data-erl='uggc://...'>
         } else if ('undefined' !== typeof elem.data('nrl')){
-            var sNrl = elem.data('nrl'); // <span data-nrl='http://... ou uggc://...'>
-            if (-1 !== sNrl.indexOf('uggc:')) {
+            var sNrl = elem.data('nrl'); // <span data-nrl='http://... ou uggc://... and https'>
+            if (-1 !== sNrl.indexOf('uggc:') || -1 !== sNrl.indexOf('uggcf:')) {
                 return _rot13(sNrl);
             }
             return sNrl;
