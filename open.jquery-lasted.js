@@ -160,7 +160,7 @@
         var clicked = $(e.target);
         var elem = $('#' + settings.browser.name + ' div.' + _workspace.visibleIdentifier);
 
-        if (0 < elem.length) {
+        if (0 < elem.length && false == clicked.hasClass(_workspace.notOutIdentifier)) {
             opener = clicked.parents(opener).first();
             if (0 < opener.length) {
                 clicked = opener;
