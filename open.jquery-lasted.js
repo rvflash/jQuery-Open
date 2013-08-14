@@ -159,8 +159,7 @@
     {
         var clicked = $(e.target);
         var elem = $('#' + settings.browser.name + ' div.' + _workspace.visibleIdentifier);
-
-        if (0 < elem.length && false == clicked.hasClass(_workspace.notOutIdentifier)) {
+        if (0 < elem.length && 0 == clicked.closest('.'+_workspace.notOutIdentifier).length) {
             opener = clicked.parents(opener).first();
             if (0 < opener.length) {
                 clicked = opener;
