@@ -2,7 +2,7 @@
  * jQuery Open plugin
  *
  * @desc Enable to open links in iframe with loading message, in ajax, in current view or in a new window
- * @version 1.3.3
+ * @version 1.3.4
  * @author Hervé GOUCHET
  * @use jQuery 1.7+
  * @licenses Creative Commons BY-SA 2.0
@@ -50,7 +50,8 @@
             closure : {
                 name : '_close',
                 content : 'X',
-                enable : false
+                enable : false,
+                displayed: false
             },
             loading : {
                 name : '_openloader',
@@ -106,7 +107,7 @@
         e = $.extend(true, {}, e);
 
         var elem = $(e.currentTarget);
-        if (null == elem.data(_workspace.data.id)) {
+        if ('undefined' == typeof elem.data(_workspace.data.id)) {
             elem.data(_workspace.data.id, '_open' + Math.floor((Math.random() * 1001) + 1));
         }
         _workspace.data.base = elem.data(_workspace.data.id);
@@ -121,7 +122,7 @@
         } else if (elem.hasClass(_workspace.type.ajax)) {
             _workspace.type.base = _workspace.type.ajax;
         } else {
-            _workspace.type.base = settings.type;
+            _workspace.type.base = _workspace.type.self;
         }
 
         if (null != (e.currentHref = _getCompleteUrl(elem, settings))) {
@@ -143,8 +144,8 @@
     var close = function(e, settings)
     {
         // Apply callback function on exit
-        if ($.isFunction(settings[_workspace.type.base].onExit)) {
-            settings[_workspace.type.base].onExit(e);
+        if ($.isFunction(settings[settings.type].onExit)) {
+            settings[settings.type].onExit(e);
         }
         $(e.currentTab).hide().removeClass(_workspace.visibleIdentifier);
 
@@ -294,7 +295,7 @@
                 browser.filter(':first').remove();
             }
             var x = '';
-            if (settings.browser.closure.enable) {
+            if (settings.browser.closure.enable || settings.browser.closure.displayed) {
                 x = '<div class="' + settings.browser.closure.name + '">' + settings.browser.closure.content + '</div>';
             }
             $('#' + settings.browser.name).append('<div id="' + _workspace.data.base + '">' + x + '</div>');
@@ -339,6 +340,9 @@
             if ($.isFunction(settings[_workspace.type.base].onView)) {
                 settings[_workspace.type.base].onView(e);
             }
+        }
+        if (settings.browser.closure.enable || settings.browser.closure.displayed) {
+            $(e.currentTab).find('.' + settings.browser.closure.name).data('base',{data:_workspace.data.base,type:_workspace.type.base});
         }
     };
 
@@ -420,6 +424,11 @@
                         options.type = _workspace.type.iframe;
                     } else {
                         options.type = _workspace.type.ajax;
+                    }
+                    if( undefined !=  $(this).data('base') ){
+                        var base = $(this).data('base');
+                        if( undefined !=  base.type ) options.type = base.type;
+                        if( undefined !=  base.type ) options.data = base.data;
                     }
                     close(e, options);
                 }
