@@ -1,9 +1,11 @@
 /**
  * jQuery Open plugin
  *
- * @desc Enable to open links in iframe with loading message, in ajax, in current view or in a new window
- * @version 1.3.4
+ * @desc Enable to open links in iframe with loading message, in ajax, in current view or in a new window.
+ * @desc Add possibility to open content in a confirm or dialog box.
+ * @version 1.3.5
  * @author Hervé GOUCHET
+ * @author Aurélie Le Bouguennec
  * @use jQuery 1.7+
  * @licenses Creative Commons BY-SA 2.0
  * @see https://github.com/rvflash/jQuery-Open
@@ -25,12 +27,17 @@
             self : 'self',
             blank : 'blank',
             iframe : 'iframe',
-            ajax : 'ajax'
+            ajax : 'ajax',
+            confirm : 'confirm'
         },
         popup : {
             height : 780,
             width : 420
         },
+        confirm : {
+            staticName : '_confirm'
+        },
+        noCloseIdentifier : 'noClose',
         uniqueIdentifier : 'unique',
         visibleIdentifier : 'visible',
         notOutIdentifier : 'notouter'
@@ -94,6 +101,23 @@
             },
             onExit : null
         },
+        confirm : {
+            title : null,
+            content : null,
+            name : "opConfirm",
+            onSuccess : null,
+            onCancel : null,
+            buttons : {
+                name : "confirmBts",
+                successLabel : "Ok",
+                cancelLabel : "Cancel"
+            },
+            modal : true,
+            modalClass : 'modal',
+            autoClose : false,
+            onView : null,
+            onExit : null
+        },
         window : {
             onExit : null
         }
@@ -138,6 +162,10 @@
                     return _redirect(e, settings);
             }
         }
+        if(settings.type == _workspace.type.confirm){
+            _workspace.type.base = _workspace.type.confirm;
+            return _confirm(e, settings);
+        }
         return false;
     };
 
@@ -154,14 +182,20 @@
         if (0 == browser.children('.' + _workspace.visibleIdentifier).length) {
             browser.removeClass(_workspace.data.loaded);
         }
+        if(browser.hasClass(settings.confirm.modalClass)){
+            browser.removeClass(settings.confirm.modalClass);
+        }
     };
 
     var outerClosure = function (e, opener, settings)
     {
+        if(true == $('div.' + _workspace.visibleIdentifier).hasClass(_workspace.noCloseIdentifier)) return false;
+
         var clicked = $(e.target);
         var elem = $('#' + settings.browser.name + ' div.' + _workspace.visibleIdentifier);
 
         if (0 < elem.length && 0 == clicked.closest('.'+_workspace.notOutIdentifier).length) {
+
             opener = clicked.parents(opener).first();
             if (0 < opener.length) {
                 clicked = opener;
@@ -172,6 +206,8 @@
             if (0 == opener.length && clicked[0] != elem[0] && 0 == clicked.parents("#" + elem.attr('id')).length) {
                 if (elem.children('iframe').length) {
                     _workspace.type.base = _workspace.type.iframe;
+                } else if (elem.hasClass(_workspace.confirm.staticName)) {
+                    _workspace.type.base = _workspace.type.confirm;
                 } else {
                     _workspace.type.base = _workspace.type.ajax;
                 }
@@ -260,6 +296,63 @@
             settings.window.onExit(e);
         }
         return window.location.href = e.currentHref;
+    };
+
+    var _confirm = function(e, settings)
+    {
+        _buildBrowser(settings);
+        var container = $('#' + _workspace.data.base);
+
+        if (container.children('.' + _workspace.type.confirm + 'Content').length == 0) {
+            container.addClass(settings.confirm.name).addClass(_workspace.confirm.staticName);
+
+            if(null == settings.confirm.content) return false;
+
+            if(null != settings.confirm.title) {
+                var ctTitle = $('<h1 class="'+ _workspace.type.confirm + 'Title">' + settings.confirm.title + '</h1>');
+                container.append(ctTitle);
+            }
+            container.append('<div class="'+ _workspace.type.confirm + 'Content">' + settings.confirm.content + '</div>');
+
+
+            var eEvent = e;
+            var oSettings = settings;
+
+            //create confirm buttons
+            if(null != settings.confirm.onSuccess) {
+                container.addClass(_workspace.noCloseIdentifier);
+                var btContainer = $('<div class="'+ settings.confirm.buttons.name +'"></div>');
+                var btOk = $('<button class="cfOk">'+ settings.confirm.buttons.successLabel +'</button>');
+                btContainer.append(btOk);
+                btOk.click(function(e){
+                    if ($.isFunction(oSettings.confirm.onSuccess)) {
+                        oSettings.confirm.onSuccess(eEvent);
+                    }
+                    close(eEvent, oSettings);
+                });
+
+                var btCancel = $('<button class="cfCancel">'+ settings.confirm.buttons.cancelLabel +'</button>');
+                btContainer.append(btCancel);
+                btCancel.click(function(e){
+                    if ($.isFunction(oSettings.confirm.onCancel)) {
+                        oSettings.confirm.onCancel(eEvent);
+                    }
+                    close(eEvent, oSettings);
+                });
+                container.append(btContainer);
+            }
+        }
+
+        // add class for modal
+        var browser = $('#' + settings.browser.name);
+        if(settings.confirm.modal) browser.addClass(settings.confirm.modalClass);
+
+        //activate autoClose
+        if('number' == typeof settings.confirm.autoClose ) {
+            setTimeout(function(){ close(eEvent, oSettings); }, oSettings.confirm.autoClose);
+        }
+
+        return _loadedView(e, settings);
     };
 
     var _buildBrowser = function(settings)
