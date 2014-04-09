@@ -327,7 +327,7 @@
                 var btContainer = $('<div class="'+ settings.confirm.buttons.name +'"></div>');
                 var btOk = $('<button class="cfOk">'+ settings.confirm.buttons.successLabel +'</button>');
                 btContainer.append(btOk);
-                btOk.click(function(e){
+                btOk.click(function(){
                     if ($.isFunction(oSettings.confirm.onSuccess)) {
                         oSettings.confirm.onSuccess(eEvent);
                     }
@@ -336,7 +336,7 @@
 
                 var btCancel = $('<button class="cfCancel">'+ settings.confirm.buttons.cancelLabel +'</button>');
                 btContainer.append(btCancel);
-                btCancel.click(function(e){
+                btCancel.click(function(){
                     if ($.isFunction(oSettings.confirm.onCancel)) {
                         oSettings.confirm.onCancel(eEvent);
                     }
