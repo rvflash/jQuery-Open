@@ -126,7 +126,6 @@
     var open = function (e, settings)
     {
         e.preventDefault();
-        console.log("open",e,settings);
 
         // Clone event to prevent overloading
         e = $.extend(true, {}, e);
@@ -164,7 +163,7 @@
                     return _redirect(e, settings);
             }
         }
-console.log(settings.type, _workspace.type.base);
+
         if(settings.type == _workspace.type.confirm){
             _workspace.type.base = _workspace.type.confirm;
             return _confirm(e, settings);
@@ -543,7 +542,6 @@ console.log(settings.type, _workspace.type.base);
 
     $.open = function(pattern, settings)
     {
-        console.log("open");
         var options;
         if ('undefined' != typeof settings) {
             options = $.extend(true, {}, _defaults, settings);
@@ -552,7 +550,6 @@ console.log(settings.type, _workspace.type.base);
         }
         $(options.container).on('click', pattern, function(e)
         {
-            console.log("click",$(this),$(this).hasClass(_workspace.disableIdentifier));
             if (false == $(this).hasClass(_workspace.disableIdentifier)) {
                 open(e, options);
             } else {
