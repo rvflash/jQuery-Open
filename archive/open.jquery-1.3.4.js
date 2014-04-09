@@ -2,7 +2,7 @@
  * jQuery Open plugin
  *
  * @desc Enable to open links in iframe with loading message, in ajax, in current view or in a new window
- * @version 1.3.5
+ * @version 1.3.4
  * @author Hervé GOUCHET
  * @use jQuery 1.7+
  * @licenses Creative Commons BY-SA 2.0
@@ -33,8 +33,7 @@
         },
         uniqueIdentifier : 'unique',
         visibleIdentifier : 'visible',
-        notOutIdentifier : 'notouter',
-        disableIdentifier : 'sleeping'
+        notOutIdentifier : 'notouter'
     };
 
     var _defaults = {
@@ -51,7 +50,8 @@
             closure : {
                 name : '_close',
                 content : 'X',
-                enable : false
+                enable : false,
+                displayed: false
             },
             loading : {
                 name : '_openloader',
@@ -183,10 +183,10 @@
 
     var _ajax = function (e, settings)
     {
-        if (true !== $('#' + settings.name).data(_workspace.data.loading)) {
-            _buildBrowser(e, settings);
+        if (null == $('#' + settings.name).data(_workspace.data.loading)) {
+            _buildBrowser(settings);
 
-            if (true !== $('#' + _workspace.data.base).data(_workspace.data.loaded)) {
+            if (null == $('#' + _workspace.data.base).data(_workspace.data.loaded)) {
                 $('#' + settings.name).data(_workspace.data.loading, true);
 
                 return $.get(e.currentHref, function(data)
@@ -194,28 +194,24 @@
                     $('#' + settings.name).data(_workspace.data.loading, false);
                     $('#' + _workspace.data.base).append(data);
                 }).success(function()
-                {
-                    _loadedView(e, settings);
-                }).error(function()
-                {
-                    if (settings.browser.error.enable) {
-                        $('#' + settings.browser.error.name).show().delay(1000).hide();
-                    }
-                }).always(function()
-                {
-                    $(e.currentTarget).removeClass(_workspace.disableIdentifier);
-                });
+                    {
+                        _loadedView(e, settings);
+                    }).error(function()
+                    {
+                        if (settings.browser.error.enable) {
+                            $('#' + settings.browser.error.name).show().delay(1000).hide();
+                        }
+                    });
             }
-
             return _loadedView(e, settings);
         }
     };
 
     var _iframe = function(e, settings)
     {
-        _buildBrowser(e, settings);
+        _buildBrowser(settings);
 
-        if (true !== $('#' + _workspace.data.base).data(_workspace.data.loaded)) {
+        if (null == $('#' + _workspace.data.base).data(_workspace.data.loaded)) {
             var properties = [];
             for (var opts in settings.iframe.options) {
                 properties.push(opts + ' = "' + settings.iframe.options[opts] + '"');
@@ -266,7 +262,7 @@
         return window.location.href = e.currentHref;
     };
 
-    var _buildBrowser = function(e, settings)
+    var _buildBrowser = function(settings)
     {
         // Build environment
         if (0 == $('#' + settings.browser.name).length) {
@@ -299,12 +295,12 @@
                 browser.filter(':first').remove();
             }
             var x = '';
-            if (settings.browser.closure.enable) {
+            if (settings.browser.closure.enable || settings.browser.closure.displayed) {
                 x = '<div class="' + settings.browser.closure.name + '">' + settings.browser.closure.content + '</div>';
             }
             $('#' + settings.browser.name).append('<div id="' + _workspace.data.base + '">' + x + '</div>');
         }
-        _closeIt(e, $('#' + settings.browser.name + ' > div.visible'), true);
+        $('#' + settings.browser.name + ' > div').hide();
     };
 
     var _loadedView = function(e, settings)
@@ -334,7 +330,7 @@
             elem.addClass(_workspace.visibleIdentifier);
 
             // Apply callback function on first loading
-            if (true !== elem.data(_workspace.data.loaded)) {
+            if (null == elem.data(_workspace.data.loaded)) {
                 if ($.isFunction(settings[_workspace.type.base].onLoaded)) {
                     settings[_workspace.type.base].onLoaded(e);
                 }
@@ -345,19 +341,9 @@
                 settings[_workspace.type.base].onView(e);
             }
         }
-
-        if (settings.browser.closure.enable) {
-            $(e.currentTab).find('.' + settings.browser.closure.name).data('base', {
-                data: _workspace.data.base,
-                type: _workspace.type.base
-            });
+        if (settings.browser.closure.enable || settings.browser.closure.displayed) {
+            $(e.currentTab).find('.' + settings.browser.closure.name).data('base',{data:_workspace.data.base,type:_workspace.type.base});
         }
-
-        if('undefined' == typeof window.jOpenSettings) {
-            window.jOpenSettings = [];
-        }
-        window.jOpenSettings[_workspace.data.base] = settings;
-        window.jOpenSettings[_workspace.data.base].type = _workspace.type.base;
     };
 
     var _rot13 = function(encoded)
@@ -399,33 +385,6 @@
         return url;
     };
 
-    var _closeIt = function (e, elem, force)
-    {
-        if ('undefined' == typeof force) {
-            force = false;
-        }
-        e.currentTab = elem;
-        if (e.currentTab.hasClass(_workspace.visibleIdentifier)) {
-            var oCloseBt = elem.find('.' + _defaults.browser.closure.name);
-            if(undefined != oCloseBt.data('base')){
-                var base = oCloseBt.data('base');
-                var options;
-                if('undefined' != typeof window.jOpenSettings && 'undefined' != typeof window.jOpenSettings[base.data]){
-                    options = window.jOpenSettings[base.data];
-                }
-                if(undefined !=  base.data) {
-                    options.data = base.data;
-                }
-            }
-            if(force){
-                e.autoClosed = true;
-            }
-            if (force || options.browser.closure.enable) {
-                close(e, options);
-            }
-        }
-    }
-
     var _getUrl = function(elem)
     {
         if ('undefined' !== typeof elem.attr('href')) {
@@ -456,20 +415,23 @@
         }
         $(options.container).on('click', pattern, function(e)
         {
-            if (false == $(this).hasClass(_workspace.disableIdentifier)) {
-                open(e, options);
-            } else {
-                e.preventDefault();
-            }
-            if (false == $(this).hasClass(_workspace.type.blank) && false == $(this).hasClass(_workspace.type.self)
-                && (options.type == _workspace.type.ajax || $(this).hasClass(_workspace.type.ajax))
-                && (undefined == $(this).data(_workspace.data.id) || $('#'+$(this).data(_workspace.data.id)).length == 0
-                    || true != $('#'+$(this).data(_workspace.data.id)).data(_workspace.data.loaded))) {
-                $(this).addClass(_workspace.disableIdentifier);
-            }
+            open(e, options);
         }).on('click', '#' + options.browser.name + ' .' + options.browser.closure.name, function(e)
             {
-                _closeIt(e, $(this).parent());
+                if (options.browser.closure.enable) {
+                    e.currentTab = $(this).parent();
+                    if ($(e.currentTab).children('iframe').length) {
+                        options.type = _workspace.type.iframe;
+                    } else {
+                        options.type = _workspace.type.ajax;
+                    }
+                    if( undefined !=  $(this).data('base') ){
+                        var base = $(this).data('base');
+                        if( undefined !=  base.type ) options.type = base.type;
+                        if( undefined !=  base.type ) options.data = base.data;
+                    }
+                    close(e, options);
+                }
             }).on('click', function(e)
             {
                 if (options.browser.outerClosure) {
