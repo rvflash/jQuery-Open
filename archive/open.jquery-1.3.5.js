@@ -1,11 +1,9 @@
 /**
  * jQuery Open plugin
  *
- * @desc Enable to open links in iframe with loading message, in ajax, in current view or in a new window.
- * @desc Add possibility to open content in a confirm or dialog box.
- * @version 1.3.6
+ * @desc Enable to open links in iframe with loading message, in ajax, in current view or in a new window
+ * @version 1.3.5
  * @author Hervé GOUCHET
- * @author Aurélie Le Bouguennec
  * @use jQuery 1.7+
  * @licenses Creative Commons BY-SA 2.0
  * @see https://github.com/rvflash/jQuery-Open
@@ -27,17 +25,12 @@
             self : 'self',
             blank : 'blank',
             iframe : 'iframe',
-            ajax : 'ajax',
-            confirm : 'confirm'
+            ajax : 'ajax'
         },
         popup : {
             height : 780,
             width : 420
         },
-        confirm : {
-            staticName : '_confirm'
-        },
-        noCloseIdentifier : 'noClose',
         uniqueIdentifier : 'unique',
         visibleIdentifier : 'visible',
         notOutIdentifier : 'notouter',
@@ -101,23 +94,6 @@
             },
             onExit : null
         },
-        confirm : {
-            title : null,
-            content : null,
-            name : "opConfirm",
-            onSuccess : null,
-            onCancel : null,
-            buttons : {
-                name : "confirmBts",
-                successLabel : "Ok",
-                cancelLabel : "Cancel"
-            },
-            modal : true,
-            modalClass : 'modal',
-            autoClose : false,
-            onView : null,
-            onExit : null
-        },
         window : {
             onExit : null
         }
@@ -149,7 +125,7 @@
             _workspace.type.base = _workspace.type.self;
         }
 
-        if (null != (e.currentHref = _getCompleteUrl(elem, settings)) && settings.type != _workspace.type.confirm) {
+        if (null != (e.currentHref = _getCompleteUrl(elem, settings))) {
             switch (_workspace.type.base) {
                 case _workspace.type.ajax:
                     return _ajax(e, settings);
@@ -157,16 +133,10 @@
                     return _iframe(e, settings);
                 case _workspace.type.blank:
                     return _popup(e, settings);
-                case _workspace.type.confirm:
-                    return _confirm(e, settings);
+                case _workspace.type.self:
                 default:
                     return _redirect(e, settings);
             }
-        }
-
-        if(settings.type == _workspace.type.confirm){
-            _workspace.type.base = _workspace.type.confirm;
-            return _confirm(e, settings);
         }
         return false;
     };
@@ -184,15 +154,10 @@
         if (0 == browser.children('.' + _workspace.visibleIdentifier).length) {
             browser.removeClass(_workspace.data.loaded);
         }
-        if(browser.hasClass(settings.confirm.modalClass)){
-            browser.removeClass(settings.confirm.modalClass);
-        }
     };
 
     var outerClosure = function (e, opener, settings)
     {
-        if(true == $('div.' + _workspace.visibleIdentifier).hasClass(_workspace.noCloseIdentifier)) return false;
-
         var clicked = $(e.target);
         var elem = $('#' + settings.browser.name + ' div.' + _workspace.visibleIdentifier);
 
@@ -207,8 +172,6 @@
             if (0 == opener.length && clicked[0] != elem[0] && 0 == clicked.parents("#" + elem.attr('id')).length) {
                 if (elem.children('iframe').length) {
                     _workspace.type.base = _workspace.type.iframe;
-                } else if (elem.hasClass(_workspace.confirm.staticName)) {
-                    _workspace.type.base = _workspace.type.confirm;
                 } else {
                     _workspace.type.base = _workspace.type.ajax;
                 }
@@ -231,18 +194,19 @@
                     $('#' + settings.name).data(_workspace.data.loading, false);
                     $('#' + _workspace.data.base).append(data);
                 }).success(function()
-                    {
-                        _loadedView(e, settings);
-                    }).error(function()
-                    {
-                        if (settings.browser.error.enable) {
-                            $('#' + settings.browser.error.name).show().delay(1000).hide();
-                        }
-                    }).always(function()
-                    {
-                        $(e.currentTarget).removeClass(_workspace.disableIdentifier);
-                    });
+                {
+                    _loadedView(e, settings);
+                }).error(function()
+                {
+                    if (settings.browser.error.enable) {
+                        $('#' + settings.browser.error.name).show().delay(1000).hide();
+                    }
+                }).always(function()
+                {
+                    $(e.currentTarget).removeClass(_workspace.disableIdentifier);
+                });
             }
+
             return _loadedView(e, settings);
         }
     };
@@ -300,63 +264,6 @@
             settings.window.onExit(e);
         }
         return window.location.href = e.currentHref;
-    };
-
-    var _confirm = function(e, settings)
-    {
-        _buildBrowser(e,settings);
-        var container = $('#' + _workspace.data.base);
-
-        if (container.children('.' + _workspace.type.confirm + 'Content').length == 0) {
-            container.addClass(settings.confirm.name).addClass(_workspace.confirm.staticName);
-
-            if(null == settings.confirm.content) return false;
-
-            if(null != settings.confirm.title) {
-                var ctTitle = $('<h1 class="'+ _workspace.type.confirm + 'Title">' + settings.confirm.title + '</h1>');
-                container.append(ctTitle);
-            }
-            container.append('<div class="'+ _workspace.type.confirm + 'Content">' + settings.confirm.content + '</div>');
-
-
-            var eEvent = e;
-            var oSettings = settings;
-
-            //create confirm buttons
-            if(null != settings.confirm.onSuccess) {
-                container.addClass(_workspace.noCloseIdentifier);
-                var btContainer = $('<div class="'+ settings.confirm.buttons.name +'"></div>');
-                var btOk = $('<button class="cfOk">'+ settings.confirm.buttons.successLabel +'</button>');
-                btContainer.append(btOk);
-                btOk.click(function(){
-                    if ($.isFunction(oSettings.confirm.onSuccess)) {
-                        oSettings.confirm.onSuccess(eEvent);
-                    }
-                    close(eEvent, oSettings);
-                });
-
-                var btCancel = $('<button class="cfCancel">'+ settings.confirm.buttons.cancelLabel +'</button>');
-                btContainer.append(btCancel);
-                btCancel.click(function(){
-                    if ($.isFunction(oSettings.confirm.onCancel)) {
-                        oSettings.confirm.onCancel(eEvent);
-                    }
-                    close(eEvent, oSettings);
-                });
-                container.append(btContainer);
-            }
-        }
-
-        // add class for modal
-        var browser = $('#' + settings.browser.name);
-        if(settings.confirm.modal) browser.addClass(settings.confirm.modalClass);
-
-        //activate autoClose
-        if('number' == typeof settings.confirm.autoClose ) {
-            setTimeout(function(){ close(eEvent, oSettings); }, oSettings.confirm.autoClose);
-        }
-
-        return _loadedView(e, settings);
     };
 
     var _buildBrowser = function(e, settings)
@@ -517,7 +424,7 @@
                 close(e, options);
             }
         }
-    };
+    }
 
     var _getUrl = function(elem)
     {
@@ -557,7 +464,7 @@
             if (false == $(this).hasClass(_workspace.type.blank) && false == $(this).hasClass(_workspace.type.self)
                 && (options.type == _workspace.type.ajax || $(this).hasClass(_workspace.type.ajax))
                 && (undefined == $(this).data(_workspace.data.id) || $('#'+$(this).data(_workspace.data.id)).length == 0
-                || true != $('#'+$(this).data(_workspace.data.id)).data(_workspace.data.loaded))) {
+                    || true != $('#'+$(this).data(_workspace.data.id)).data(_workspace.data.loaded))) {
                 $(this).addClass(_workspace.disableIdentifier);
             }
         }).on('click', '#' + options.browser.name + ' .' + options.browser.closure.name, function(e)
